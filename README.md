@@ -16,3 +16,4 @@ Requires an Internet connection to load jQuery.
 * Silage doesn't show, and winning doesn't work. Assume the lower right corner is the end.
 * Movement needs to be completely redone, it's too blocky and slow.
 * Too much chatter with PHP. 
+* If you change the size of the browser, you'll have to reload. It breaks everything.
