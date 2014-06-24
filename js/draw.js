@@ -4,7 +4,7 @@
 var draw = {
 	init: function(){
 		draw.loadMapData();
-		draw.autoRedraw();
+		//draw.autoRedraw();
 	},
 	
 	autoRedraw: function(){
@@ -47,8 +47,10 @@ var draw = {
 	activeLayers:[
 		'mapLayer',
 	],
+	layerContexts: {},
+	
 	spriteCache: {},
-	limitToViewport: true,
+	limitToViewport: false,
 	
 	viewportXY: [0,0],
 	
@@ -62,6 +64,17 @@ var draw = {
 		}
 	},
 	
+	getCacheCanvas: function(layer){
+		if ($('#cache-'+layer).length == 0){
+			// Gather the canvas size.
+			var canvasWidth = $('#gameScreen').width();
+			var canvasHeight = $('#gameScreen').height();
+			var layerhtml = '<canvas id="cache-'+layer+'" width="'+ canvasWidth +'px" height="'+ canvasHeight +'px"></canvas>';
+			$('#cache').prepend(layerhtml);
+		}
+		return document.getElementById('cache-'+layer).getContext('2d');
+	},
+	
     drawLayer: function(layer){
 		/* Drawlayer draws the passed layer name.
 		 * Layer is the element ID of the canvas element, 
@@ -70,31 +83,14 @@ var draw = {
 		//Show the loading screen.
 		ui.showLoading();
 		
-		draw.pauseRedraw();
-		
 		console.log('refresh map');
-		//Make a jquery selector
-		var layerid = '#' + layer;
 		
 		// Gather the canvas size.
 		var canvasWidth = $('#gameScreen').width();
 		var canvasHeight = $('#gameScreen').height();
-
-		//see if the layer exists
-		if( $(layerid).length == 0 ){
-			//if the layer dosen't exist, create it.
-			var zindex = 'z-index:' + draw[layer].zindex + ';';
-			var width = 'width:' + canvasWidth + 'px;';
-			var height = 'height:' + canvasHeight + 'px;';
-			var style = 'style="' + zindex + width + height + '"';
-			var layerhtml = '<canvas id="' + layer + '"' + style +' width="'+ canvasWidth +'px" height="'+ canvasHeight +'px">'+ ui.updateBrowserMessage +'</canvas>';
-			
-			// Currently each layer must be added lowest first. We add the layer after the #obj element.
-			$('#gameScreen').prepend(layerhtml);
-		}
 		
-		// Form the context for drawing on the HTML5 canvas. 
-		var ctx = document.getElementById(layer).getContext('2d');
+		// Get the cache canvas
+		var ctx = draw.getCacheCanvas(layer);
 		
 		// Clear the board
 		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -153,9 +149,34 @@ var draw = {
 			cursorY = cursorY - (draw.tiles.height/2);
 			
 		}
-		draw.autoRedraw();
+		draw.drawDisplayCanvas(layer);
 		ui.hideLoading();
     },
+	
+	drawDisplayCanvas: function(layer){
+		// Gather the canvas size.
+		var canvasWidth = $('#gameScreen').width();
+		var canvasHeight = $('#gameScreen').height();
+		console.log(canvasWidth);
+		
+		//see if the layer exists
+		if( $('#' + layer).length == 0 ){
+			//if the layer dosen't exist, create it.
+			var zindex = 'z-index:' + draw[layer].zindex + ';';
+			var width = 'width:' + canvasWidth + 'px;';
+			var height = 'height:' + canvasHeight + 'px;';
+			var style = 'style="' + zindex + width + height + '"';
+			var layerhtml = '<canvas id="' + layer + '"' + style +' width="'+ canvasWidth +'px" height="'+ canvasHeight +'px">'+ ui.updateBrowserMessage +'</canvas>';
+			
+			// Currently each layer must be added lowest first. We add the layer after the #obj element.
+			$('#gameScreen').prepend(layerhtml);
+		}
+		// Get the display canvas
+		var ctx = document.getElementById(layer).getContext('2d');
+		var cache = document.getElementById('cache-'+layer);
+		// Write the cache to the display
+		ctx.drawImage(cache, 0, 0, canvasWidth, canvasHeight);
+	},
 
     drawSprites: function() {
 		/*
@@ -241,53 +262,14 @@ var draw = {
 		];
 	},
 	
-	moveViewport: function(){
+	moveViewport: function(XY){
 		/* Move Viewport
-		 * looks at the player's current location. 
-		 * If the player is close to the edge, 
-		 * then update the viewport and redraw the map.
+		 * When the XY is passed, move the viewport to the new location.
 		 */
-		draw.pauseRedraw();
-		// Shorthand some variables to make things easy to read
-		var player = draw.cursorOffsetBlockToPixel(sprite.characters[0][2]);
-		var playerX = player[0];
-		var playerY = player[1];
 		
-		// Gather the canvas size.
-		var canvasWidth = $('#gameScreen').width();
-		var canvasHeight = $('#gameScreen').height();
+		draw.viewportXY[0] += XY[0];
+		draw.viewportXY[1] += XY[1];
 		
-		// Wall Locations
-		var topWall = draw.tiles.height;
-		var bottomWall = canvasHeight - draw.tiles.height;
-		var leftWall = draw.tiles.width;
-		var rightWall = canvasWidth - draw.tiles.width;
-		
-		// Check if player has it one of the walls
-		if( ( playerY < topWall )
-		|| ( playerY > bottomWall )
-		|| ( playerX < leftWall )
-		|| ( playerX > rightWall ) ){
-			console.log('player touched a wall');
-			// Re-center the viewport on the player.
-			var xpos = 0;
-			var ypos = 0;
-			var rawPlayerLocation = draw.blockToPixel(sprite.characters[0][2]);
-			
-			xpos -= rawPlayerLocation[0];
-			xpos += (canvasWidth / 2 - draw.tiles.width);
-			console.log(xpos);
-			
-			ypos -= rawPlayerLocation[1];
-			ypos += (canvasHeight / 2 - draw.tiles.height);
-			console.log(ypos);
-			
-			draw.viewportXY = [xpos, ypos];
-			
-			// redraw
-			draw.redraw();
-		}
-		draw.autoRedraw();
 	},
 	
 	loadMapData: function(callback){

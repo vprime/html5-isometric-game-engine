@@ -34,8 +34,8 @@ canvas {
 #cow {
 	
 }
-#preloader {
-display: none;
+#cache {
+	display: none;
 }
 #right {
 	padding: 10px;
