@@ -1,50 +1,59 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Pragma" content="no-cache">
+
 <title>DEMO</title>
+
+<!-- jQuery -->
 <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 
+<!-- Styles -->
 <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
 <link href="style.css" rel="stylesheet" type="text/css" />
-<!--script type="text/javascript" src="js/jquery-ui.js"></script-->
-<!--script type="text/javascript" src="js/ui.js"></script-->
+
+<!-- Core code -->
 <script type="text/javascript" src="js/common.js"></script>
-<!--script type="text/javascript" src="js/constants.js"></script-->
-<!--script type="text/javascript" src="js/script.js"></script-->
+<script type="text/javascript" src="js/draw.js"></script>
+<script type="text/javascript" src="js/game.js"></script>
+<script type="text/javascript" src="js/player.js"></script>
+<script type="text/javascript" src="js/service.js"></script>
+<script type="text/javascript" src="js/sprite.js"></script>
+<script type="text/javascript" src="js/ui.js"></script>
 
+<!-- Fire the cannons -->
 <script type="text/javascript">
-
-
-$(function(){
-	game.init();        
-});
-
-
+	$(function(){
+		game.init();        
+	});
 </script>
 
 </head>
 <body>
 
-
+<!-- Game Screen -->
 <div id="gameScreen">
 	<div id="obj"></div>
 </div>
 
+<!-- Overlay -->
 <div id="overlay"></div>
 
+<!-- Toolbar -->
 <div id="toolbar">
     <div id="title">Drunken Pastures: Use arrow keys to move cow.</div>
-
     <div id="blog"><img src="images/ui-toolbar-btn-blog.png" title="Read my blog" /></div>
 </div>
 
+<!-- UI Elements -->
 <div id="alertBox"></div>
 <div id="winBox"></div>
 <div id="loading">Loading <img src="images/loading.gif" /></div>
 
+<!-- Preload game elements -->
 <div id="preloader">
     <img src="images/tileset_10.png" alt="preload" />
     <img src="images/tileset_17.png" alt="preload" />
