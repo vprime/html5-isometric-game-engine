@@ -13,13 +13,11 @@ var player = {
 			player.stopMovement();
 		});
 		$('#overlay').mousemove(function(event){
-			if ( player.moving ) {
-				player.movePlayer([event.clientX, event.clientY]);
-			}
+			player.mousePosition = [event.clientX, event.clientY];
 		});
 	},
 	
-	moving: false,
+	mousePosition: [0,0],
 	
 	keyBinding: {
 		up:{
@@ -67,18 +65,21 @@ var player = {
 		}
 	},
 	
-	speed: 1,
+	speed: 10,
+	
 	
 	startMovement: function(){
-		player.moving = true;
+		player['movingProcess'] = setInterval(function(){
+			player.movePlayer();
+		}, 50);
 	},
 	
 	stopMovement: function(){
-		player.moving = false;
+		clearInterval(player.movingProcess);
 	},
 	
-	movePlayer: function(mousePosition){
-		draw.movePlayer(mousePosition);
+	movePlayer: function(){
+		draw.movePlayer(player.mousePosition);
 	},
 	
 };

@@ -216,10 +216,10 @@ var draw = {
 		var centerX = XY[0];
 		var centerY = XY[1];
 		
-		var deltaX = centerX - mouseX;
-		var deltaY = centerY - mouseY;
+		var deltaX = mouseX - centerX;
+		var deltaY = mouseY - centerY;
 		
-		var normalized = draw.normalize([deltaX, deltaY], 1);
+		var normalized = draw.normalize([deltaX, deltaY], player.speed);
 		console.log(normalized);
 		
 		for( var layer in draw.activeLayers ){
@@ -235,7 +235,7 @@ var draw = {
 	},
 	
 	moveCanvas: function(ctx, XY){
-		ctx.transform(0,0,0,0,XY[0],XY[1]);
+		ctx.translate(XY[0],XY[1]);
 	},
 
     drawSprites: function() {
