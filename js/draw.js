@@ -3,7 +3,10 @@
 // Drawing Functionality
 var draw = {
 	init: function(){
-		draw.loadMapData();
+		draw.loadMapData(function(){
+			draw.redraw();
+			draw.showPlayer();
+		});
 		//draw.autoRedraw();
 	},
 	
@@ -58,6 +61,26 @@ var draw = {
 		draw.drawLayers();
 	},
 	
+	canvasSize: function(){
+		if (typeof draw.canvasSizeCache == 'undefined' ) {
+			// Gather the canvas size.
+			draw.canvasSizeCache = [$('#gameScreen').width(), $('#gameScreen').height()];
+		}
+		return draw.canvasSizeCache;
+	},
+	
+	centerOfCanvas: function(){
+		return [draw.canvasSize()[0]/2, draw.canvasSize()[1]/2];
+	},
+	
+	showPlayer: function(){
+		var spriteImages = sprite.characters[0][1];
+		var spriteID = sprite.characters[0][3];
+		var spriteName = sprite.characters[0][0];
+		var exactPosition = [draw.centerOfCanvas()[0] - (draw.tiles.width/2),draw.centerOfCanvas()[1] - (draw.tiles.height/2)];
+		$('#overlay').append('<div id="' + spriteID + '" style="width:128px; height:64px; position:absolute; top:'+ exactPosition[1] +'px; left:'+ exactPosition[0] +'px; background-image:url('+ spriteImages['right'] +'); background-repeat:no-repeat;" title="' + spriteName + '"></div>');
+	},
+	
 	drawLayers: function(){
 		for( var layer in draw.activeLayers ){
 			draw.drawLayer(draw.activeLayers[layer]);
@@ -66,10 +89,7 @@ var draw = {
 	
 	getCacheCanvas: function(layer){
 		if ($('#cache-'+layer).length == 0){
-			// Gather the canvas size.
-			var canvasWidth = $('#gameScreen').width();
-			var canvasHeight = $('#gameScreen').height();
-			var layerhtml = '<canvas id="cache-'+layer+'" width="'+ canvasWidth +'px" height="'+ canvasHeight +'px"></canvas>';
+			var layerhtml = '<canvas id="cache-'+layer+'" width="'+ draw.canvasSize()[0] +'px" height="'+ draw.canvasSize()[1] +'px"></canvas>';
 			$('#cache').prepend(layerhtml);
 		}
 		return document.getElementById('cache-'+layer).getContext('2d');
@@ -85,15 +105,11 @@ var draw = {
 		
 		console.log('refresh map');
 		
-		// Gather the canvas size.
-		var canvasWidth = $('#gameScreen').width();
-		var canvasHeight = $('#gameScreen').height();
-		
 		// Get the cache canvas
 		var ctx = draw.getCacheCanvas(layer);
 		
 		// Clear the board
-		ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+		ctx.clearRect(0, 0, draw.canvasSize[0], draw.canvasSize[1]);
 		
 		// Set the cursor draw position.
 		var cursorX = draw.viewportXY[0] - (draw.tiles.width/2);
@@ -128,7 +144,7 @@ var draw = {
 					// Limit draw distance to viewport?
 					if ( draw.limitToViewport ) {
 						// If the block is within the confines of our view, then draw it. 
-						if( ( canvasWidth > cursorX ) && ((draw.tiles.width * -1) < cursorX) && ( canvasHeight > cursorY) && ((draw.tiles.height * -1) < cursorY)){
+						if( ( draw.canvasSize[0] > cursorX ) && ((draw.tiles.width * -1) < cursorX) && ( draw.canvasSize[1] > cursorY) && ((draw.tiles.height * -1) < cursorY)){
 							ctx.drawImage(tile, cursorX, cursorY);
 						}
 					} else {
@@ -149,33 +165,77 @@ var draw = {
 			cursorY = cursorY - (draw.tiles.height/2);
 			
 		}
-		draw.drawDisplayCanvas(layer);
+		draw.updateDisplayCanvas(layer);
 		ui.hideLoading();
     },
 	
-	drawDisplayCanvas: function(layer){
-		// Gather the canvas size.
-		var canvasWidth = $('#gameScreen').width();
-		var canvasHeight = $('#gameScreen').height();
-		console.log(canvasWidth);
-		
+	getDisplayCanvas: function(layer){
+		console.log(layer);
 		//see if the layer exists
 		if( $('#' + layer).length == 0 ){
 			//if the layer dosen't exist, create it.
 			var zindex = 'z-index:' + draw[layer].zindex + ';';
-			var width = 'width:' + canvasWidth + 'px;';
-			var height = 'height:' + canvasHeight + 'px;';
+			var width = 'width:' + draw.canvasSize()[0] + 'px;';
+			var height = 'height:' + draw.canvasSize()[1] + 'px;';
 			var style = 'style="' + zindex + width + height + '"';
-			var layerhtml = '<canvas id="' + layer + '"' + style +' width="'+ canvasWidth +'px" height="'+ canvasHeight +'px">'+ ui.updateBrowserMessage +'</canvas>';
+			var layerhtml = '<canvas id="' + layer + '"' + style +' width="'+ draw.canvasSize()[0] +'px" height="'+ draw.canvasSize()[1] +'px">'+ ui.updateBrowserMessage +'</canvas>';
 			
 			// Currently each layer must be added lowest first. We add the layer after the #obj element.
 			$('#gameScreen').prepend(layerhtml);
 		}
-		// Get the display canvas
-		var ctx = document.getElementById(layer).getContext('2d');
+		return document.getElementById(layer).getContext('2d');
+	},
+	
+	updateDisplayCanvas: function(layer, ctx){
+		
+		if (typeof ctx == "undefined"){
+			// Get the display canvas
+			var ctx = draw.getDisplayCanvas(layer);
+		}
+		// Get the cache, canvas.
 		var cache = document.getElementById('cache-'+layer);
 		// Write the cache to the display
-		ctx.drawImage(cache, 0, 0, canvasWidth, canvasHeight);
+		ctx.clearRect(0, 0, draw.canvasSize()[0], draw.canvasSize()[1]);
+		ctx.drawImage(cache, 0, 0, draw.canvasSize()[0], draw.canvasSize()[1]);
+	},
+	
+	normalize: function(XY, scale){
+		var normal = Math.sqrt(XY[0] * XY[0] + XY[1] * XY[1]);
+		if ( normal != 0 ) {
+			var x = scale * XY[0] / normal;
+			var y = scale * XY[1] / normal;
+		}
+		return [x, y];
+	},
+	
+	movePlayer: function(XY){
+		
+		var mouseX = draw.centerOfCanvas()[0];
+		var mouseY = draw.centerOfCanvas()[1];
+		
+		var centerX = XY[0];
+		var centerY = XY[1];
+		
+		var deltaX = centerX - mouseX;
+		var deltaY = centerY - mouseY;
+		
+		var normalized = draw.normalize([deltaX, deltaY], 1);
+		console.log(normalized);
+		
+		for( var layer in draw.activeLayers ){
+			draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
+		}
+	},
+	
+	moveDisplayCanvas: function(layer, XY){
+		// Get the canvas
+		var ctx = draw.getDisplayCanvas(layer);
+		draw.moveCanvas(ctx, XY);
+		draw.updateDisplayCanvas(layer, ctx);
+	},
+	
+	moveCanvas: function(ctx, XY){
+		ctx.transform(0,0,0,0,XY[0],XY[1]);
 	},
 
     drawSprites: function() {
@@ -313,9 +373,6 @@ var draw = {
 			if( callback ){
 				callback(data);
 			}
-			
-			// Redraw everything
-			draw.redraw();
 		});
 	},
 };

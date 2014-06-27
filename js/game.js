@@ -5,6 +5,7 @@ var game = {
 		game.eventListeners();
 		ui.init();
 		draw.init();
+		player.init();
 	},
 	
 	eventListeners: function(){

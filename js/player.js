@@ -1,6 +1,26 @@
  
 // Player functions
 var player = {
+	init: function(){
+		player.eventListeners();
+	},
+	
+	eventListeners: function(){
+		$('#overlay').mousedown(function(){
+			player.startMovement();
+		});
+		$('#overlay').mouseup(function(){
+			player.stopMovement();
+		});
+		$('#overlay').mousemove(function(event){
+			if ( player.moving ) {
+				player.movePlayer([event.clientX, event.clientY]);
+			}
+		});
+	},
+	
+	moving: false,
+	
 	keyBinding: {
 		up:{
 			description:'Move up',
@@ -47,13 +67,18 @@ var player = {
 		}
 	},
 	
-	movePlayer: function(XY){
-		service.getPlayerMove(sprite.characters[0][2], XY, draw.mapID, function(data){
-			// Update the location data.
-			sprite.characters = data.chars;
-			
-			// Run any special effects that are required for the position update.
-			game.codes[data.code]();
-		});
+	speed: 1,
+	
+	startMovement: function(){
+		player.moving = true;
 	},
+	
+	stopMovement: function(){
+		player.moving = false;
+	},
+	
+	movePlayer: function(mousePosition){
+		draw.movePlayer(mousePosition);
+	},
+	
 };
