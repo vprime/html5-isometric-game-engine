@@ -25,7 +25,7 @@ var draw = {
 		width: 128,
 		source: {
 			10:'images/tileset_10.png',
-			17:'images/tileset_17.png',
+			17:'images/tileset_09.png',
 			22:'images/tileset_22.png',
 			23:'images/tileset_23.png',
 			24:'images/tileset_24.png',
@@ -145,7 +145,7 @@ var draw = {
 				continue;
 			}
 			// Step the vertical position down 32 pixels to account for the new row.
-			cursorY = cursorY + (draw.tiles.height/2);
+			cursorY = cursorY;
 			// Step the horizontal position across 64 pixel to account for the new row.
 			//cursorX = cursorX + (draw.tiles.width/2);
 			
@@ -187,7 +187,7 @@ var draw = {
 			}
 			// Moves the cursor to the start of the next row.
 			cursorX = cursorX + (draw.tiles.width);
-			cursorY = cursorY - (draw.tiles.height/2);
+			//cursorY = cursorY - (draw.tiles.height);
 			
 		}
 		draw.updateDisplayCanvas(layer);
@@ -220,8 +220,8 @@ var draw = {
 		var cache = document.getElementById('cache-'+layer);
 		
 		// Root
-		var rootX = draw.viewportXY[0];
-		var rootY = draw.viewportXY[1];
+		var rootX = draw.viewportXY[0] + (draw.canvasSize()[0]/2);
+		var rootY = draw.viewportXY[1] + (draw.canvasSize()[1]/2);
 		
 		
 		// Write the cache to the display
@@ -338,8 +338,9 @@ var draw = {
 	blockPixelLocation: function(XY){
 		var location = draw.blockToPixel(XY);
 		// Add the map root to the location
-		var mapX = 0;
-		var mapY = draw.mapSize()[1]/2;
+		
+		var mapX = 0 + draw.tiles.width;
+		var mapY = (draw.mapSize()[1]/2);
 		return [
 			location[0] + mapX,
 			location[1] + mapY
@@ -376,7 +377,7 @@ var draw = {
 	setViewportCenter: function(){
 		// This is some wild math that will take the position of the player, then figure out where the screen should be looking.
 		console.log(sprite.characters[0][2]);
-		var positionXY = draw.blockPixelLocation([0,0]);
+		var positionXY = draw.blockPixelLocation( sprite.characters[0][2] );
 		
 		// Then it takes the size of the screen, and takes the screen width and height into account.
 		//positionXY[0] += (draw.canvasSize()[0] / 2);
