@@ -61,12 +61,37 @@ var draw = {
 		draw.drawLayers();
 	},
 	
+	mapRows: function(map){
+		var size = 0, key;
+		for (key in map) {
+			if (typeof map[key] == 'object'){
+				if (map.hasOwnProperty(key)) size++;
+			}
+		}
+		return size;
+	},
+	
 	canvasSize: function(){
 		if (typeof draw.canvasSizeCache == 'undefined' ) {
 			// Gather the canvas size.
 			draw.canvasSizeCache = [$('#gameScreen').width(), $('#gameScreen').height()];
 		}
 		return draw.canvasSizeCache;
+	},
+	
+	mapSize: function(){
+		if ( typeof draw['mapSizeCache'] == 'undefined'){
+			var baseLayer = 'mapLayer';
+			var blockY = draw.mapRows(draw[baseLayer]);
+			var blockX = draw[baseLayer][0].length;
+			
+			var right = draw.blockToPixel([blockX, blockY])[0] + draw.tiles.width;
+			var down = draw.blockToPixel([0, blockY])[1] + draw.blockToPixel([0, blockY])[1] + draw.tiles.height;
+			draw['mapSizeCache'] = [right, down];
+			console.log([blockX, blockY]);
+			console.log(draw.mapSizeCache);
+		}
+		return draw.mapSizeCache;
 	},
 	
 	centerOfCanvas: function(){
@@ -89,7 +114,7 @@ var draw = {
 	
 	getCacheCanvas: function(layer){
 		if ($('#cache-'+layer).length == 0){
-			var layerhtml = '<canvas id="cache-'+layer+'" width="'+ draw.canvasSize()[0] +'px" height="'+ draw.canvasSize()[1] +'px"></canvas>';
+			var layerhtml = '<canvas id="cache-'+layer+'" width="'+ draw.mapSize()[0] +'px" height="'+ draw.mapSize()[1] +'px"></canvas>';
 			$('#cache').prepend(layerhtml);
 		}
 		return document.getElementById('cache-'+layer).getContext('2d');
@@ -109,11 +134,11 @@ var draw = {
 		var ctx = draw.getCacheCanvas(layer);
 		
 		// Clear the board
-		ctx.clearRect(0, 0, draw.canvasSize[0], draw.canvasSize[1]);
+		ctx.clearRect(0, 0, draw.mapSize()[0], draw.mapSize()[1]);
 		
 		// Set the cursor draw position.
-		var cursorX = draw.viewportXY[0] - (draw.tiles.width/2);
-		var cursorY = draw.viewportXY[1] - (draw.tiles.height/2);
+		var cursorX = 0;
+		var cursorY = draw.mapSize()[1]/2;
 		
 		for(var row in draw[layer]){
 			if ( row == 'zindex') {
@@ -144,7 +169,7 @@ var draw = {
 					// Limit draw distance to viewport?
 					if ( draw.limitToViewport ) {
 						// If the block is within the confines of our view, then draw it. 
-						if( ( draw.canvasSize[0] > cursorX ) && ((draw.tiles.width * -1) < cursorX) && ( draw.canvasSize[1] > cursorY) && ((draw.tiles.height * -1) < cursorY)){
+						if( ( draw.mapSize()[0] > cursorX ) && ((draw.tiles.width * -1) < cursorX) && ( draw.mapSize()[1] > cursorY) && ((draw.tiles.height * -1) < cursorY)){
 							ctx.drawImage(tile, cursorX, cursorY);
 						}
 					} else {
@@ -170,7 +195,6 @@ var draw = {
     },
 	
 	getDisplayCanvas: function(layer){
-		console.log(layer);
 		//see if the layer exists
 		if( $('#' + layer).length == 0 ){
 			//if the layer dosen't exist, create it.
@@ -194,9 +218,15 @@ var draw = {
 		}
 		// Get the cache, canvas.
 		var cache = document.getElementById('cache-'+layer);
+		
+		// Root
+		var rootX = draw.viewportXY[0];
+		var rootY = draw.viewportXY[1];
+		
+		
 		// Write the cache to the display
 		ctx.clearRect(0, 0, draw.canvasSize()[0], draw.canvasSize()[1]);
-		ctx.drawImage(cache, 0, 0, draw.canvasSize()[0], draw.canvasSize()[1]);
+		ctx.drawImage(cache, rootX, rootY);
 	},
 	
 	normalize: function(XY, scale){
@@ -220,7 +250,6 @@ var draw = {
 		var deltaY = mouseY - centerY;
 		
 		var normalized = draw.normalize([deltaX, deltaY], player.speed);
-		console.log(normalized);
 		
 		for( var layer in draw.activeLayers ){
 			draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
@@ -306,6 +335,17 @@ var draw = {
 		return exactXY;
 	},
 	
+	blockPixelLocation: function(XY){
+		var location = draw.blockToPixel(XY);
+		// Add the map root to the location
+		var mapX = 0;
+		var mapY = draw.mapSize()[1]/2;
+		return [
+			location[0] + mapX,
+			location[1] + mapY
+		];
+	},
+	
 	blockToPixel: function(XY){
 		// Define X and Y
 		var x = 0;
@@ -315,7 +355,8 @@ var draw = {
 		var blockWidth = draw.tiles.width/2;
 		var blockHeight = draw.tiles.height/2;
 		
-		// Multiply the block position by the pixel size of the block offsets. 
+		// Multiply the block position by the pixel size of the block offsets,
+		// offset by the maproot
 		return [
 			((XY[x] * blockWidth) + (XY[y] * blockWidth)),
 			((XY[y] * blockHeight) + (XY[x] * (-blockHeight)))
@@ -330,6 +371,22 @@ var draw = {
 		draw.viewportXY[0] += XY[0];
 		draw.viewportXY[1] += XY[1];
 		
+	},
+	
+	setViewportCenter: function(){
+		// This is some wild math that will take the position of the player, then figure out where the screen should be looking.
+		console.log(sprite.characters[0][2]);
+		var positionXY = draw.blockPixelLocation([0,0]);
+		
+		// Then it takes the size of the screen, and takes the screen width and height into account.
+		//positionXY[0] += (draw.canvasSize()[0] / 2);
+		//positionXY[1] += (draw.canvasSize()[1] / 2);
+		
+		positionXY[0] = positionXY[0] * -1;
+		positionXY[1] = positionXY[1] * -1;
+		
+		// Set position
+		draw.viewportXY = positionXY;
 	},
 	
 	loadMapData: function(callback){
@@ -349,25 +406,8 @@ var draw = {
 			// Map Identifier
 			draw.mapID = data.mapid;
 			
-			// Set the map home view position, for now we'll hard code this but It should be defined by the server itself.
-			var xposition = 0;
-			var yposition = 0;
-			
-			// Load character location
-			PlayerX = sprite.characters[0][2][0];
-			PlayerY = sprite.characters[0][2][1];
-			
-			// This is some wild math that will take the position of the player, then figure out where the screen should be looking.
-			xposition -= (PlayerY * 64) + (PlayerX * 64);
-			yposition += ((PlayerX * 32) + (PlayerY * (-32)));
-			
-			// Then it takes the size of the screen, and takes the screen width and height into account. 
-			xposition += ($('#gameScreen').width() / 2 - 128);
-			yposition += ($('#gameScreen').height() / 2 - 64);
-			
-			// Set position
-			draw.viewportXY[0] = xposition;
-			draw.viewportXY[1] = yposition;
+			// Set the center of the viewport
+			draw.setViewportCenter();
 			
 			// Run callback
 			if( callback ){
