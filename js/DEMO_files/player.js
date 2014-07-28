@@ -18,8 +18,6 @@ var player = {
 	},
 	
 	mousePosition: [0,0],
-	playerPosition: [0,0],
-	playerPixelPosition: [0,0],
 	
 	keyBinding: {
 		up:{

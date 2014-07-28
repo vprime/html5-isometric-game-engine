@@ -223,6 +223,7 @@ var draw = {
 		var rootX = draw.viewportXY[0] + (draw.canvasSize()[0]/2);
 		var rootY = draw.viewportXY[1] + (draw.canvasSize()[1]/2);
 		
+		
 		// Write the cache to the display
 		ctx.clearRect(0, 0, draw.canvasSize()[0], draw.canvasSize()[1]);
 		ctx.drawImage(cache, rootX, rootY);
@@ -249,12 +250,6 @@ var draw = {
 		var deltaY = mouseY - centerY;
 		
 		var normalized = draw.normalize([deltaX, deltaY], player.speed);
-		
-		player.playerPixelPosition = [
-			player.playerPixelPosition[0] + normalized[0],
-			player.playerPixelPosition[1] + normalized[1]
-		];
-		draw.pixelToBlock(player.playerPixelPosition);
 		
 		for( var layer in draw.activeLayers ){
 			draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
@@ -340,30 +335,6 @@ var draw = {
 		return exactXY;
 	},
 	
-	pixelToBlock: function(XY){
-		var mapX = 0 + draw.tiles.width;
-		var mapY = (draw.mapSize()[1]/2);
-		
-		// Use virtural grid method
-		var virturalBlockWidth = draw.tiles.width/2;
-		var virturalBlockHeight = draw.tiles.height/2;
-		
-		XY = [XY[0] - mapX, XY[1] - mapY];
-		
-		var virturalBlockX = XY[0] / virturalBlockWidth;
-		var virturalBlockY = XY[1] / virturalBlockHeight;
-		
-		var inverseBlockY = draw.mapSize()[1] - virturalBlockY;
-		
-		var blockX = inverseBlockY + (virturalBlockX - draw.mapSize()[0] / 2);
-		var blockY = inverseBlockY - (virturalBlockX - draw.mapSize()[0] / 2);
-		
-		//var blockX = (blockWidth / XY[1]) + (blockWidth / XY[0]);
-		//var blockY = ((-blockHeight) / XY[0]) + (blockHeight / XY[1]);
-		
-		$('#toolbar #title').html('Location ' + virturalBlockX + 'X : ' + virturalBlockY + 'Y');
-	},
-	
 	blockPixelLocation: function(XY){
 		var location = draw.blockToPixel(XY);
 		// Add the map root to the location
@@ -414,8 +385,6 @@ var draw = {
 		
 		positionXY[0] = positionXY[0] * -1;
 		positionXY[1] = positionXY[1] * -1;
-		
-		//player.playerPixelPosition = positionXY;
 		
 		// Set position
 		draw.viewportXY = positionXY;
