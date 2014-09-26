@@ -445,24 +445,6 @@ var draw = {
 		$('#toolbar #title').html('Location ' + blockX + 'X : ' + blockY + 'Y');
 	},
 
-	pixelToBlockSlightlyLessOld: function(XY){
-		var x = XY[0];
-		var y = XY[1];
-
-		var blockX = (x / draw.tiles.width/2 - y / draw.tiles.height/2)/2;
-		var blockY = (y / draw.tiles.height/2 + (x / draw.tiles.width/2))/2;
-
-		$('#toolbar #title').html('Location ' + blockX + 'X : ' + blockY + 'Y');	
-		return [blockX, blockY];
-	},
-
-	pixelToBlockbad: function(XY){
-
-
-		$('#toolbar #title').html('Location ' + blockX + 'X : ' + blockY + 'Y');
-		return [blockX, blockY];
-	},
-
 	/*
 	* Returns the pixel location of the block, in relation to the active portion of the map.
 	*/
