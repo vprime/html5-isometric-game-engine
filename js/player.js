@@ -81,7 +81,7 @@ var player = {
 	},
 	
 	movePlayer: function(){
-		draw.movePlayer(player.mousePosition);
+		draw.movePlayerViewport(player.mousePosition);
 	},
 	
 };

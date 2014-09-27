@@ -299,12 +299,11 @@ var draw = {
 		}
 		return [x, y];
 	},
-	
+
 	/*
-	* Add the normalized vector to the current position, and move the display in that direction.
+	* Calculates the new location of the player
 	*/
-	movePlayer: function(XY){
-		
+	movePlayerViewport: function(XY) {
 		var mouseX = draw.centerOfCanvas()[0];
 		var mouseY = draw.centerOfCanvas()[1];
 		
@@ -317,16 +316,17 @@ var draw = {
 		var normalized = draw.normalize([deltaX, deltaY], player.speed);
 		
 		player.playerPixelPosition = [
-			player.playerPixelPosition[0] + normalized[0],
-			player.playerPixelPosition[1] + normalized[1]
+			player.playerPixelPosition[0] - normalized[0],
+			player.playerPixelPosition[1] - normalized[1]
 		];
+		ui.pixelLocation(player.playerPixelPosition);
 		draw.pixelToBlock(player.playerPixelPosition);
 		
 		for( var layer in draw.activeLayers ){
 			draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
 		}
 	},
-	
+
 	/*
 	* Move the display canvas layer to the new location
 	*/
@@ -422,27 +422,29 @@ var draw = {
 	
 	/*
 	* This reverses the pixel location to blocks
-	* @@TODO: This is broke as all fucking hell. Holy crap it sucks.
 	*/
 	pixelToBlock: function(XY){
+		console.log(XY);
 		// Use virtural grid method
 		var virturalBlockWidth = draw.tiles.width;
 		var virturalBlockHeight = draw.tiles.height;
-		
-		//XY = [XY[0] - mapX, XY[1] - mapY];
-		
+		console.log('Virtural Block size ' + virturalBlockWidth + " x - " + virturalBlockHeight + " y");
+
 		var virturalBlockX = XY[0] / virturalBlockWidth;
 		var virturalBlockY = XY[1] / virturalBlockHeight;
-		
+		console.log('Virtural block location ' + virturalBlockX + ' x - ' + virturalBlockY + ' y');
+
 		var inverseBlockY = draw.mapBlockSize()[1] - virturalBlockY;
+		var inverseBlockX = draw.mapBlockSize()[0] - virturalBlockX;
+
+		console.log('Inverse block Y ' + inverseBlockY);
+		console.log('Map block size ' + draw.mapBlockSize()[0]/2 + ' x - ' + draw.mapBlockSize()[1]/2 + ' y');
+
+		var blockX = inverseBlockY + (virturalBlockX - draw.mapBlockSize()[0] / 2);
+		var blockY = virturalBlockY - (inverseBlockX - draw.mapBlockSize()[0] / 2) - 1;
 		
-		var blockX = virturalBlockY + (virturalBlockX - draw.mapBlockSize()[0] / 2);
-		var blockY = virturalBlockY - (virturalBlockX - draw.mapBlockSize()[0] / 2);
 		
-		//var blockX = (blockWidth / XY[1]) + (blockWidth / XY[0]);
-		//var blockY = ((-blockHeight) / XY[0]) + (blockHeight / XY[1]);
-		
-		$('#toolbar #title').html('Location ' + blockX + 'X : ' + blockY + 'Y');
+		ui.blockLocation([blockX, blockY]);
 	},
 
 	/*
@@ -498,6 +500,7 @@ var draw = {
 	*/
 	setViewportCenter: function(){
 		// This is some wild math that will take the position of the player, then figure out where the screen should be looking.
+		console.log('Player central location');
 		console.log(sprite.characters[0][2]);
 		var positionXY = draw.blockPixelLocation( sprite.characters[0][2] );
 		
@@ -536,6 +539,10 @@ var draw = {
 			
 			// Set the center of the viewport
 			draw.setViewportCenter();
+
+			// Set the player position in the center of the viewport.
+			player.playerPixelPosition = draw.blockPixelLocation( [sprite.characters[0][2][0], sprite.characters[0][2][1]] );
+			player.playerPosition = sprite.characters[0][2];
 			
 			// Run callback
 			if( callback ){
