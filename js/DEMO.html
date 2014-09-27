@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html><head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+
+<title>DEMO</title>
+
+<!-- jQuery -->
+<script src="DEMO_files/jquery-1.js"></script>
+<script src="DEMO_files/jquery-migrate-1.js"></script>
+
+<!-- Styles -->
+<link href="DEMO_files/css.css" rel="stylesheet" type="text/css">
+<link href="DEMO_files/style.css" rel="stylesheet" type="text/css">
+
+<!-- Core code -->
+<script type="text/javascript" src="DEMO_files/common.js"></script>
+<script type="text/javascript" src="DEMO_files/draw.js"></script>
+<script type="text/javascript" src="DEMO_files/game.js"></script>
+<script type="text/javascript" src="DEMO_files/player.js"></script>
+<script type="text/javascript" src="DEMO_files/service.js"></script>
+<script type="text/javascript" src="DEMO_files/sprite.js"></script>
+<script type="text/javascript" src="DEMO_files/ui.js"></script>
+
+<!-- Fire the cannons -->
+<script type="text/javascript">
+	$(function(){
+		game.init();        
+	});
+</script>
+
+</head>
+<body>
+
+<!-- Game Screen -->
+<div id="gameScreen"><canvas id="mapLayer" style="z-index:10;width:1920px;height:709px;" width="1920px" height="709px">Your browser does not support the HTML5 Canvas element. Please update your system, or download <a href="http://mozilla.com/">Mozilla Firefox</a>.</canvas>
+	<div id="obj"></div>
+</div>
+
+<!-- Overlay -->
+<div id="overlay"><div id="cow1" style="width:128px; height:64px; position:absolute; top:322.5px; left:896px; background-image:url(images/tileset_cow_03.png); background-repeat:no-repeat;" title="You"></div></div>
+
+<!-- Toolbar -->
+<div id="toolbar">
+    <div id="title">Drunken Pastures: Use arrow keys to move cow.</div>
+    <div id="blog"><img src="DEMO_files/ui-toolbar-btn-blog.png" title="Read my blog"></div>
+</div>
+
+<!-- UI Elements -->
+<div style="display: none;" id="alertBox"></div>
+<div style="display: none;" id="winBox"></div>
+<div style="display: none;" id="loading">Loading <img src="DEMO_files/loading.gif"></div>
+
+<!-- cache game elements -->
+<div id="cache"><canvas id="cache-mapLayer" width="7936px" height="3968px"></canvas>
+    <img src="DEMO_files/tileset_09.png" alt="preload">
+    <img src="DEMO_files/tileset_10.png" alt="preload">
+    <img src="DEMO_files/tileset_17.png" alt="preload">
+    <img src="DEMO_files/tileset_cow_03.png" alt="preload">
+
+    <img src="DEMO_files/tileset_22.png" alt="preload">
+    <img src="DEMO_files/tileset_24.png" alt="preload">
+    <img src="DEMO_files/tileset_23.png" alt="preload">
+    <img src="DEMO_files/tileset_25.png" alt="preload">
+
+</div>
+
+
+</body></html>

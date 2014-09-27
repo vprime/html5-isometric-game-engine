@@ -18,8 +18,6 @@ var player = {
 	},
 	
 	mousePosition: [0,0],
-	playerPosition: [0,0],
-	playerPixelPosition: [0,0],
 	
 	keyBinding: {
 		up:{
@@ -81,20 +79,7 @@ var player = {
 	},
 	
 	movePlayer: function(){
-		draw.movePlayerViewport(player.mousePosition);
-
-		ui.blockLocation(player.playerPosition);
-	},
-
-	updatePlayerPosition: function(XY){
-		if (!compareBlocks(player.playerPosition, XY)) {
-			if (game.positionCodeListener(XY)){
-				player.playerPosition = XY;	
-				return true;
-			}
-			return false;
-		}
-		return true;
+		draw.movePlayer(player.mousePosition);
 	},
 	
 };
