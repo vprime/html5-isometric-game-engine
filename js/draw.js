@@ -49,7 +49,7 @@ var draw = {
 				'right':'images/tileset_cow_03.png',
 				'down':'images/tileset_cow_03.png',
 				'left':'images/tileset_cow_03_left.png',
-				'offset':[0,0],
+				'offset':[-0.2,-0.2],
 			}
 		},
 	},
@@ -316,17 +316,25 @@ var draw = {
 		
 		var normalized = draw.normalize([deltaX, deltaY], player.speed);
 		
-		player.playerPixelPosition = [
+		var newPixelPosition = [
 			player.playerPixelPosition[0] - normalized[0],
 			player.playerPixelPosition[1] - normalized[1]
 		];
-		ui.pixelLocation(player.playerPixelPosition);
-		player.playerPosition = draw.pixelToBlock(player.playerPixelPosition, draw.tiles.source.cow.offset, false);
+
 		
-		
-		for( var layer in draw.activeLayers ){
-			draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
+		var canMove = player.updatePlayerPosition( draw.pixelToBlock(newPixelPosition, draw.tiles.source.cow.offset, false) );
+
+		if ( canMove ) {
+			player.playerPixelPosition = newPixelPosition;
+			
+			ui.pixelLocation(player.playerPixelPosition);
+			
+			
+			for( var layer in draw.activeLayers ){
+				draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
+			}
 		}
+
 	},
 
 	/*

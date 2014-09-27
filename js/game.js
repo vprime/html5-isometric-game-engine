@@ -44,16 +44,22 @@ var game = {
 	},
 	
 	codes: {
-		100: function() {
+		ground: function() {
 			// No effect
+			return true;
 		},
-		0: function() {
+		wall: function() {
 			// Blocked
-			ui.showAlert('I can\'t go there.');
+			//ui.showAlert('I can\'t go there.');
+			return false;
 		},
-		1: function() {
+		water: function() {
+			game.codes.wall();
+		},
+		death: function() {
 			// Death
 			ui.showAlert('You died');
+			return true;
 		},
 		2: function() {
 			// Teleport
@@ -61,10 +67,20 @@ var game = {
 		3: function() {
 			// Change map
 		},
-		4: function() {
+		win: function() {
 			// Game is won
 			ui.showWin();
+			return false;
 		},
-	}
+	},
+
+	positionCodeListener: function(newPosition){
+		var tileID = game.findTileID( draw.mapLayer, newPosition);
+		return map.runTileCode(tileID);
+	},
+
+	findTileID: function(mapLayer, position){
+		return mapLayer[position[1]][position[0]]
+	},
 	
 };

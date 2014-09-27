@@ -85,5 +85,16 @@ var player = {
 
 		ui.blockLocation(player.playerPosition);
 	},
+
+	updatePlayerPosition: function(XY){
+		if (!compareBlocks(player.playerPosition, XY)) {
+			if (game.positionCodeListener(XY)){
+				player.playerPosition = XY;	
+				return true;
+			}
+			return false;
+		}
+		return true;
+	},
 	
 };
