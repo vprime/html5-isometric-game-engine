@@ -82,6 +82,8 @@ var player = {
 	
 	movePlayer: function(){
 		draw.movePlayerViewport(player.mousePosition);
+
+		ui.blockLocation(player.playerPosition);
 	},
 	
 };

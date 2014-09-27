@@ -34,7 +34,7 @@ var draw = {
 		width: 128,
 		source: {
 			10:'images/tileset_10.png',
-			17:'images/tileset_09.png',
+			17:'images/tileset_17.png',
 			22:'images/tileset_22.png',
 			23:'images/tileset_23.png',
 			24:'images/tileset_24.png',
@@ -48,7 +48,8 @@ var draw = {
 				'up':'images/tileset_cow_03_left.png',
 				'right':'images/tileset_cow_03.png',
 				'down':'images/tileset_cow_03.png',
-				'left':'images/tileset_cow_03_left.png'
+				'left':'images/tileset_cow_03_left.png',
+				'offset':[0,0],
 			}
 		},
 	},
@@ -320,7 +321,8 @@ var draw = {
 			player.playerPixelPosition[1] - normalized[1]
 		];
 		ui.pixelLocation(player.playerPixelPosition);
-		draw.pixelToBlock(player.playerPixelPosition);
+		player.playerPosition = draw.pixelToBlock(player.playerPixelPosition, draw.tiles.source.cow.offset, false);
+		
 		
 		for( var layer in draw.activeLayers ){
 			draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
@@ -423,28 +425,24 @@ var draw = {
 	/*
 	* This reverses the pixel location to blocks
 	*/
-	pixelToBlock: function(XY){
-		console.log(XY);
+	pixelToBlock: function(XY, blockOffset, floatOutput){
 		// Use virtural grid method
 		var virturalBlockWidth = draw.tiles.width;
 		var virturalBlockHeight = draw.tiles.height;
-		console.log('Virtural Block size ' + virturalBlockWidth + " x - " + virturalBlockHeight + " y");
 
 		var virturalBlockX = XY[0] / virturalBlockWidth;
 		var virturalBlockY = XY[1] / virturalBlockHeight;
-		console.log('Virtural block location ' + virturalBlockX + ' x - ' + virturalBlockY + ' y');
 
 		var inverseBlockY = draw.mapBlockSize()[1] - virturalBlockY;
 		var inverseBlockX = draw.mapBlockSize()[0] - virturalBlockX;
 
-		console.log('Inverse block Y ' + inverseBlockY);
-		console.log('Map block size ' + draw.mapBlockSize()[0]/2 + ' x - ' + draw.mapBlockSize()[1]/2 + ' y');
-
-		var blockX = inverseBlockY + (virturalBlockX - draw.mapBlockSize()[0] / 2);
-		var blockY = virturalBlockY - (inverseBlockX - draw.mapBlockSize()[0] / 2) - 1;
+		var blockX = inverseBlockY + (virturalBlockX - draw.mapBlockSize()[0] / 2) - .5 + blockOffset[0];
+		var blockY = virturalBlockY - (inverseBlockX - draw.mapBlockSize()[0] / 2) - 1 + blockOffset[1];
 		
-		
-		ui.blockLocation([blockX, blockY]);
+		if (floatOutput)
+			return [blockX, blockY];
+		else
+			return [Math.round(blockX), Math.round(blockY)];
 	},
 
 	/*
