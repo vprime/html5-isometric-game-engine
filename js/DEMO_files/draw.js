@@ -10,31 +10,22 @@ var draw = {
 		//draw.autoRedraw();
 	},
 	
-	/*
-	* Redraw the map every n seconds
-	*/
 	autoRedraw: function(){
 		draw['redrawProcess'] = setInterval(function(){
 			draw.drawSprites();
 		}, 200);
 	},
 	
-	/*
-	* Pause the redraw, useful to save resources while loading, or computing something that will change things.
-	*/
 	pauseRedraw: function(){
 		clearInterval(draw.redrawProcess);
 	},
 	
-	/*
-	* Tile data @@TODO: Move this someplace else
-	*/
 	tiles: {
 		height: 64,
 		width: 128,
 		source: {
 			10:'images/tileset_10.png',
-			17:'images/tileset_17.png',
+			17:'images/tileset_09.png',
 			22:'images/tileset_22.png',
 			23:'images/tileset_23.png',
 			24:'images/tileset_24.png',
@@ -48,38 +39,28 @@ var draw = {
 				'up':'images/tileset_cow_03_left.png',
 				'right':'images/tileset_cow_03.png',
 				'down':'images/tileset_cow_03.png',
-				'left':'images/tileset_cow_03_left.png',
-				'offset':[-0.2,-0.2],
+				'left':'images/tileset_cow_03_left.png'
 			}
 		},
 	},
-	/*
-	* Drawing application storage
-	*/
-	mapLayer: {}, 	// Ground tiles
-	objectLayer: {},// Shit that's on the ground
-	mobLayer: {}, 	// Active shit
-	mapID: 0, 		// Current active map
-	activeLayers:[	// Layers that are actually being used, also sets the order in which they are drawn.
+	mapLayer: {},
+	objectLayer: {},
+	mobLayer: {},
+	mapID: 0,
+	activeLayers:[
 		'mapLayer',
 	],
-	layerContexts: {}, // Canvas context storage for the layers
+	layerContexts: {},
 	
-	spriteCache: {}, // Remembers the position of the sprites
-	limitToViewport: false, // Limits the draw distance to only what you can actually see.
+	spriteCache: {},
+	limitToViewport: false,
 	
-	viewportXY: [0,0], // Where the center of the screen is. Looks like a fucking owl.
+	viewportXY: [0,0],
 	
-	/* 
-	* Helper function to redraw everything
-	*/
 	redraw: function(){
 		draw.drawLayers();
 	},
 	
-	/*
-	* Returns the number of rows in the map
-	*/
 	mapRows: function(map){
 		var size = 0, key;
 		for (key in map) {
@@ -90,9 +71,6 @@ var draw = {
 		return size;
 	},
 	
-	/*
-	* Returns the size of the canvas (Visible game area)
-	*/
 	canvasSize: function(){
 		if (typeof draw.canvasSizeCache == 'undefined' ) {
 			// Gather the canvas size.
@@ -101,9 +79,6 @@ var draw = {
 		return draw.canvasSizeCache;
 	},
 	
-	/*
-	* Returns the size of the map, in pixels.
-	*/
 	mapSize: function(){
 		if ( typeof draw['mapSizeCache'] == 'undefined'){
 			var baseLayer = 'mapLayer';
@@ -118,30 +93,11 @@ var draw = {
 		}
 		return draw.mapSizeCache;
 	},
-
-	/*
-	* Returns the size of the map, in blocks
-	*/
-	mapBlockSize: function(){
-		if ( typeof draw['mapBlockSizeCache'] == 'undefined'){
-			var baseLayer = 'mapLayer';
-			var blockY = draw.mapRows(draw[baseLayer]);
-			var blockX = draw[baseLayer][0].length;
-			draw['mapBlockSizeCache'] = [blockX, blockY];
-		}
-		return draw.mapBlockSizeCache;
-	},
 	
-	/*
-	* Returns the center of the visible game area
-	*/
 	centerOfCanvas: function(){
 		return [draw.canvasSize()[0]/2, draw.canvasSize()[1]/2];
 	},
 	
-	/*
-	* Puts your player graphic smack, dab, in the middle of the fucking screen.
-	*/
 	showPlayer: function(){
 		var spriteImages = sprite.characters[0][1];
 		var spriteID = sprite.characters[0][3];
@@ -150,20 +106,12 @@ var draw = {
 		$('#overlay').append('<div id="' + spriteID + '" style="width:128px; height:64px; position:absolute; top:'+ exactPosition[1] +'px; left:'+ exactPosition[0] +'px; background-image:url('+ spriteImages['right'] +'); background-repeat:no-repeat;" title="' + spriteName + '"></div>');
 	},
 	
-	/*
-	* Draws all the active layers
-	*/
 	drawLayers: function(){
 		for( var layer in draw.activeLayers ){
 			draw.drawLayer(draw.activeLayers[layer]);
 		}
 	},
 	
-	/*
-	* Returns the active cache'd canvas for the layer. (Creates one if need be.)
-	* The cache'd canvas is the full rendering of the canvas, but hidden from view.
-	* To improve preformance when just moving around, we redraw whatever section of this canvas the player is hovering over.
-	*/
 	getCacheCanvas: function(layer){
 		if ($('#cache-'+layer).length == 0){
 			var layerhtml = '<canvas id="cache-'+layer+'" width="'+ draw.mapSize()[0] +'px" height="'+ draw.mapSize()[1] +'px"></canvas>';
@@ -172,9 +120,6 @@ var draw = {
 		return document.getElementById('cache-'+layer).getContext('2d');
 	},
 	
-	/*
-	* Draws the layer to it's cache'd canvas
-	*/
     drawLayer: function(layer){
 		/* Drawlayer draws the passed layer name.
 		 * Layer is the element ID of the canvas element, 
@@ -249,9 +194,6 @@ var draw = {
 		ui.hideLoading();
     },
 	
-    /*
-    * Get the display canvas (A smaller canvas, that is actually visible to the player)
-    */
 	getDisplayCanvas: function(layer){
 		//see if the layer exists
 		if( $('#' + layer).length == 0 ){
@@ -268,9 +210,6 @@ var draw = {
 		return document.getElementById(layer).getContext('2d');
 	},
 	
-	/*
-	* Update the canvas (Center it on the player location)
-	*/
 	updateDisplayCanvas: function(layer, ctx){
 		
 		if (typeof ctx == "undefined"){
@@ -284,14 +223,12 @@ var draw = {
 		var rootX = draw.viewportXY[0] + (draw.canvasSize()[0]/2);
 		var rootY = draw.viewportXY[1] + (draw.canvasSize()[1]/2);
 		
+		
 		// Write the cache to the display
 		ctx.clearRect(0, 0, draw.canvasSize()[0], draw.canvasSize()[1]);
 		ctx.drawImage(cache, rootX, rootY);
 	},
 	
-	/*
-	* Generate a normalized vector
-	*/
 	normalize: function(XY, scale){
 		var normal = Math.sqrt(XY[0] * XY[0] + XY[1] * XY[1]);
 		if ( normal != 0 ) {
@@ -300,11 +237,9 @@ var draw = {
 		}
 		return [x, y];
 	},
-
-	/*
-	* Calculates the new location of the player
-	*/
-	movePlayerViewport: function(XY) {
+	
+	movePlayer: function(XY){
+		
 		var mouseX = draw.centerOfCanvas()[0];
 		var mouseY = draw.centerOfCanvas()[1];
 		
@@ -316,30 +251,11 @@ var draw = {
 		
 		var normalized = draw.normalize([deltaX, deltaY], player.speed);
 		
-		var newPixelPosition = [
-			player.playerPixelPosition[0] - normalized[0],
-			player.playerPixelPosition[1] - normalized[1]
-		];
-
-		
-		var canMove = player.updatePlayerPosition( draw.pixelToBlock(newPixelPosition, draw.tiles.source.cow.offset, false) );
-
-		if ( canMove ) {
-			player.playerPixelPosition = newPixelPosition;
-			
-			ui.pixelLocation(player.playerPixelPosition);
-			
-			
-			for( var layer in draw.activeLayers ){
-				draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
-			}
+		for( var layer in draw.activeLayers ){
+			draw.moveDisplayCanvas(draw.activeLayers[layer], normalized);
 		}
-
 	},
-
-	/*
-	* Move the display canvas layer to the new location
-	*/
+	
 	moveDisplayCanvas: function(layer, XY){
 		// Get the canvas
 		var ctx = draw.getDisplayCanvas(layer);
@@ -347,17 +263,10 @@ var draw = {
 		draw.updateDisplayCanvas(layer, ctx);
 	},
 	
-	/*
-	* Translate, why is this in a new function?
-	*/
 	moveCanvas: function(ctx, XY){
 		ctx.translate(XY[0],XY[1]);
 	},
 
-	/*
-	* Makes little divs for every sprite on the screen
-	* @@TODO: Convert to a canvas, this is old code from the demo
-	*/
     drawSprites: function() {
 		/*
 		 * Draws and Updates all the sprites on the map.
@@ -406,10 +315,6 @@ var draw = {
 
     },
 	
-	/*
-	* Determine where the cursor is at a certian block location...
-	* Used to draw sprites in old code, pretty much unused right now.
-	*/
 	cursorOffsetBlockToPixel: function(XY){
 		// Define X and Y
 		var x = 0;
@@ -430,32 +335,6 @@ var draw = {
 		return exactXY;
 	},
 	
-	/*
-	* This reverses the pixel location to blocks
-	*/
-	pixelToBlock: function(XY, blockOffset, floatOutput){
-		// Use virtural grid method
-		var virturalBlockWidth = draw.tiles.width;
-		var virturalBlockHeight = draw.tiles.height;
-
-		var virturalBlockX = XY[0] / virturalBlockWidth;
-		var virturalBlockY = XY[1] / virturalBlockHeight;
-
-		var inverseBlockY = draw.mapBlockSize()[1] - virturalBlockY;
-		var inverseBlockX = draw.mapBlockSize()[0] - virturalBlockX;
-
-		var blockX = inverseBlockY + (virturalBlockX - draw.mapBlockSize()[0] / 2) - .5 + blockOffset[0];
-		var blockY = virturalBlockY - (inverseBlockX - draw.mapBlockSize()[0] / 2) - 1 + blockOffset[1];
-		
-		if (floatOutput)
-			return [blockX, blockY];
-		else
-			return [Math.round(blockX), Math.round(blockY)];
-	},
-
-	/*
-	* Returns the pixel location of the block, in relation to the active portion of the map.
-	*/
 	blockPixelLocation: function(XY){
 		var location = draw.blockToPixel(XY);
 		// Add the map root to the location
@@ -468,9 +347,6 @@ var draw = {
 		];
 	},
 	
-	/*
-	* Returns the pixel location of the block
-	*/
 	blockToPixel: function(XY){
 		// Define X and Y
 		var x = 0;
@@ -488,9 +364,6 @@ var draw = {
 		];
 	},
 	
-	/*
-	* Old Code
-	*/
 	moveViewport: function(XY){
 		/* Move Viewport
 		 * When the XY is passed, move the viewport to the new location.
@@ -501,12 +374,8 @@ var draw = {
 		
 	},
 	
-	/* 
-	* Sets the center of the viewport to the start of the map
-	*/
 	setViewportCenter: function(){
 		// This is some wild math that will take the position of the player, then figure out where the screen should be looking.
-		console.log('Player central location');
 		console.log(sprite.characters[0][2]);
 		var positionXY = draw.blockPixelLocation( sprite.characters[0][2] );
 		
@@ -517,15 +386,10 @@ var draw = {
 		positionXY[0] = positionXY[0] * -1;
 		positionXY[1] = positionXY[1] * -1;
 		
-		//player.playerPixelPosition = positionXY;
-		
 		// Set position
 		draw.viewportXY = positionXY;
 	},
 	
-	/*
-	* Load the map data
-	*/
 	loadMapData: function(callback){
 		service.getMapData(function(data){
 			// Core map layer
@@ -545,10 +409,6 @@ var draw = {
 			
 			// Set the center of the viewport
 			draw.setViewportCenter();
-
-			// Set the player position in the center of the viewport.
-			player.playerPixelPosition = draw.blockPixelLocation( [sprite.characters[0][2][0], sprite.characters[0][2][1]] );
-			player.playerPosition = sprite.characters[0][2];
 			
 			// Run callback
 			if( callback ){
