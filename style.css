@@ -1,5 +1,8 @@
 @charset "utf-8";
 @import 'expand.css';
+@import 'libs/open-iconic/font/css/open-iconic.min.css';
+
+
 /* CSS Document */
 html, body {
 	margin: 0;
@@ -180,4 +183,29 @@ canvas {
 	position: relative;
 	display: block;
 	border: 0 none;
+}
+
+
+/*
+* DEV
+*/
+#dev {
+	position: fixed;
+	top: 10px;
+	left: 10px;
+	
+	z-index: 800;	
+	background-color: rgba(61, 61, 61, 0.42);
+	border: solid 1px black;
+
+	color: #d0d0d0;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 10px;
+	
+}
+#dev .expand-button {
+	padding: 5px;
+}
+#dev .expand-content {
+	padding: 5px;
 }

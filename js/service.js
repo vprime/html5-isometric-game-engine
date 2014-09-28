@@ -5,13 +5,13 @@ var service = {
 	getMapData: function(callback) {
 		var mapURL = 'map.php';
 		var commands = {};
-		$.post(mapURL, commands, function(data){
+		$.getJSON(mapURL, function(data){
 			// Run Callback
 			callback(data);
 			return data;
-		}, 'json');
+		});
 	},
-	
+
 	// Check Player Move
 	getPlayerMove: function(oldXY, newXY, mapID, callback) {
 		var updateURL = 'map.php';

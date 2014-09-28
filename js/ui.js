@@ -62,8 +62,10 @@ var ui = {
 	},
 
 	expandButton:function(){
-		$('.expand-button').click(function(element){
-			element.parent('.expand').css('expanded');
+		$('.expand-button').click(function(event){
+
+			$(event.target).parent('.expand').toggleClass('collapsed');
+
 		});
 	},
 }; 
