@@ -1,0 +1,6 @@
+.expand .expand-content{
+	display:block;
+}
+.expand.collapsed  .expand-content{
+	display:none;
+}

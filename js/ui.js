@@ -47,4 +47,22 @@ var ui = {
 	hideLoading:function(){
 		$('#loading').hide();
 	},
+
+	/*
+	* Debug Methods
+	*/
+	blockLocation:function(XY){
+		$('#block-location .x').html(XY[0]);
+		$('#block-location .y').html(XY[1]);
+	},
+	pixelLocation:function(XY){
+		$('#pixel-location .x').html(XY[0]);
+		$('#pixel-location .y').html(XY[1]);
+	},
+
+	expandButton:function(){
+		$('.expand-button').click(function(element){
+			element.parent('.expand').css('expanded');
+		});
+	}
 }; 
